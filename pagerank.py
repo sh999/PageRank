@@ -1,3 +1,6 @@
+# pagerank.py
+# Given input of a file with JSON objects showing adj. list for sites in a domain
+#  Calculate the pageranks for sites in the domain
 import json
 from pprint import pprint
 
