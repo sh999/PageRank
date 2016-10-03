@@ -1,0 +1,4 @@
+{"url": "A", "linkedurls": ["B","C"]}
+{"url": "B", "linkedurls": ["C"]}
+{"url": "C", "linkedurls": ["A"]}
+{"url": "D", "linkedurls": ["C"]}

@@ -1,0 +1,8 @@
+{"url": "Home", "linkedurls": ["About","Product","Links"]}
+{"url": "About", "linkedurls": ["Home"]}
+{"url": "Product", "linkedurls": ["Home"]}
+{"url": "Links", "linkedurls": ["Home","External A","External B","External C","External D"]}
+{"url": "External A", "linkedurls": []}
+{"url": "External B", "linkedurls": []}
+{"url": "External C", "linkedurls": []}
+{"url": "External D", "linkedurls": []}
