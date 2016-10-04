@@ -230,20 +230,16 @@ def test_onestep():
 	pprint(round2)
 	round3 = matrix_times_vector(rotated_weighted, round2)
 
-def one_iteration(damping, adj_list, pr_vector):
+def one_iteration(damping, matrix, pr_vector):
 	new_pr_vector = {}
 	inv_damping = 1 - damping
 	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
-	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
-	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
-	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
 	# sites_list = make_site_list(adj_list)				 # Each unique site has an integer ID
 	# pr_vec = make_init_pr_vec(sites_list)					 # Make initial PR vector, which is a vector with unique sites w/ score 1
 	# rw_v = matrix_times_vector(rotated_weighted, pr_vector)
 	#term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
 	#term2 = surfer_times_pr(inv_damping,pr_vector)
-	term1 = matrix_times_vector(rotated_weighted, pr_vector)
+	term1 = matrix_times_vector(matrix, pr_vector)
 	term2 = surfer_times_pr(0,pr_vector)
 	added = add_vectors(term1,term2)
 
@@ -274,27 +270,29 @@ def normalize(vector):
 		vector[i] = vector[i]/summed
 	return vector
 def looping():
-	damping = 0.85
+	damping = 1 
 	adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
 	adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-	# adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
-	adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
+	adj_list = {"1":{"2":0,"3":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
 	pr_vector = make_init_pr_vec(make_site_list(adj_list))
-	pr = one_iteration(damping, adj_list, pr_vector)
+	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
+	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
+	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
+	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
 	print "\norig pr:"
-	pprint(pr)
-	limit = 3
+	pprint(pr_vector)
+	pr = one_iteration(damping, rotated_weighted_damping, pr_vector)
+	limit = 30
 	iterations = 0
 	while(iterations < limit):
 		print "\n-------------"
 		print "\nRun iteration ", iterations
-		pr = one_iteration(damping, adj_list, pr)
+		pr = one_iteration(damping, rotated_weighted_damping, pr)
 		print "\nsummed:", sum_vector(pr)
-		#print "\nnormalized:"
-		#pprint(normalize(pr))
 		iterations += 1
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
-test_onestep()
+#test_onestep()
+looping()
