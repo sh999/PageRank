@@ -64,22 +64,22 @@ def matrix_times_vector(matrix, vector):
 	'''
 		One iteration of the pagerank calculation
 	'''
-	pprint(matrix)
-	pprint(vector)
+	#pprint(matrix)
+	#pprint(vector)
 	pr_vector = {}	
 	for row in vector:						# Loop through result vector
-		print "\npr row:", row
+		#print "\npr row:", row
 		curr_sum = 0
 		if row in matrix:
-			print "matrix[row]:", matrix[row]
+			#print "matrix[row]:", matrix[row]
 			for elem in matrix[row]:		# Loop through matrix row	
-				print "multiplying", elem, ":", matrix[row][elem], "by", vector[row]
+				#print "multiplying", elem, ":", matrix[row][elem], "by", vector[row]
 				mult = matrix[row][elem] * vector[elem]		# Multiply matrix row by vector column
 				curr_sum += mult 			# Sum terms successively
-			print "curr_sum:", curr_sum
+			#print "curr_sum:", curr_sum
 		pr_vector[row] = curr_sum
-	print "Matrix times vector:"
-	pprint(pr_vector)
+	#print "Matrix times vector:"
+	#pprint(pr_vector)
 	return pr_vector
 def rotate(matrix):
 	'''
@@ -233,12 +233,7 @@ def test_onestep():
 def one_iteration(damping, matrix, pr_vector):
 	new_pr_vector = {}
 	inv_damping = 1 - damping
-	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-	# sites_list = make_site_list(adj_list)				 # Each unique site has an integer ID
-	# pr_vec = make_init_pr_vec(sites_list)					 # Make initial PR vector, which is a vector with unique sites w/ score 1
-	# rw_v = matrix_times_vector(rotated_weighted, pr_vector)
-	#term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
-	#term2 = surfer_times_pr(inv_damping,pr_vector)
+	matrix = scalar_times_matrix(damping, matrix) 
 	term1 = matrix_times_vector(matrix, pr_vector)
 	term2 = surfer_times_pr(inv_damping,pr_vector)
 	added = add_vectors(term1,term2)
@@ -271,8 +266,8 @@ def normalize(vector):
 	return vector
 def looping():
 	damping = 0.85 
-	adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
-#	adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+	#adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
+	adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 	#adj_list = {"1":{"2":0,"3":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
 	pr_vector = make_init_pr_vec(make_site_list(adj_list))
 	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
@@ -282,7 +277,7 @@ def looping():
 	print "\norig pr:"
 	pprint(pr_vector)
 	pr = one_iteration(damping, rotated_weighted_damping, pr_vector)
-	limit = 30
+	limit = 3
 	iterations = 0
 	while(iterations < limit):
 		print "\n-------------"
