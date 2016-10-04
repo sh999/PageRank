@@ -261,7 +261,7 @@ def normalize(vector):
 		vector[i] = vector[i]/summed
 	return vector
 def looping():
-	damping = 0.75 
+	damping = 0.85 
 	# adj_list = {"1":{"2":0,"3":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
 	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}} 	# Adj list in the form of From -> To, will be rotated to To <- From
 	# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
@@ -272,11 +272,12 @@ def looping():
 	weighted = calc_weighted(adj_list)  	 				# Get adj list of raw numbers (1 = outlinks to)
 	rotated_weighted = rotate(weighted)		 				# Rotate weighted adj list to proper form
 	print "Rotated Weighted matrix:"
-	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
+	rotated_weighted_fixed = fix_zero_columns(adj_list,rotated_weighted)		# Fix matrix (if needed) by filling in 0 vectors with 1/n 
+	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted_fixed)		 # Multiply weighted matrix by damping factor (alpha * S)
 	print "After damping:"
 	pprint(rotated_weighted_damping)
 	pr = one_iteration(damping, rotated_weighted_damping, pr_vector)
-	limit = 5
+	limit = 10
 	iterations = 0
 	while(iterations < limit):
 		print "\n-------------"
