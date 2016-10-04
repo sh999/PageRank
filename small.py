@@ -240,7 +240,7 @@ def one_iteration(damping, matrix, pr_vector):
 	#term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
 	#term2 = surfer_times_pr(inv_damping,pr_vector)
 	term1 = matrix_times_vector(matrix, pr_vector)
-	term2 = surfer_times_pr(0,pr_vector)
+	term2 = surfer_times_pr(inv_damping,pr_vector)
 	added = add_vectors(term1,term2)
 
 	print"\nterm1:"
@@ -270,10 +270,10 @@ def normalize(vector):
 		vector[i] = vector[i]/summed
 	return vector
 def looping():
-	damping = 1 
+	damping = 0.85 
 	adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
-	adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-	adj_list = {"1":{"2":0,"3":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
+#	adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+	#adj_list = {"1":{"2":0,"3":0,"4":0},"2":{"3":0,"4":0},"3":{"1":0},"4":{"1":0,"3":0}}
 	pr_vector = make_init_pr_vec(make_site_list(adj_list))
 	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
 	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
