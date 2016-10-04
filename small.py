@@ -241,21 +241,42 @@ def one_iteration(damping, adj_list, pr_vector):
 	pprint(added)
 	print ""
 	return added
+def sum_vector(vector):
+	'''
+		For normalizing the values of the pagerank vector so they add to 1
+	'''
+	summed = 0
+	for i in vector:
+		summed += vector[i]
+	return summed
+def normalize(vector):
+	'''
+		For normalizing the values of the pagerank vector so they add to 1
+	'''
+	summed = 0
+	for i in vector:
+		summed += vector[i]
+	for i in vector:
+		vector[i] = vector[i]/summed
+	return vector
 
 damping = 0.85
 adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
-# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
 pr_vector = make_init_pr_vec(make_site_list(adj_list))
 pr = one_iteration(damping, adj_list, pr_vector)
 print "\norig pr:"
 pprint(pr)
-limit = 100
+limit = 50
 iterations = 0
 while(iterations < limit):
 	print "\n-------------"
 	print "\nRun iteration ", iterations
 	pr = one_iteration(damping, adj_list, pr)
+	print "\nsummed:", sum_vector(pr)
+	print "\nnormalized:"
+	pprint(normalize(pr))
 	iterations += 1
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
