@@ -86,31 +86,41 @@ def make_init_pr_vec_weighted(site_list):
 	# print "pr_vec:"
 	# pprint(pr_vec)
 	return pr_vec
-def matrix_times_vector(matrix, vector):
+def matrix_times_vector(damping, matrix, vector, dangling_sites):
 	'''
 		One iteration of the pagerank calculation
 	'''
 
-	# print "matrix_times_vector:"
-
-	# pprint(matrix)
-	# pprint(vector)
+	print "matrix_times_vector:"
+	print "damping:", damping
+	pprint(matrix)
+	pprint(vector)
 	pr_vector = {}	
+	null_sum = 0
+	factor = 1.0/len(vector)*damping
+	print "Factor:", factor
+	for d in dangling_sites:
+		print "Adding dangling site:", d
+		null_sum = null_sum + vector[d] * factor
+	print "null_sum:", null_sum
 	for row in vector:						# Loop through result vector
-		# print "\npr row:", row
+		print "\npr row:", row
 		curr_sum = 0
 		if row in matrix:
-			# print "matrix[row]:", matrix[row]
+			print "matrix[row]:", matrix[row]
 			for elem in matrix[row]:		# Loop through matrix row	
 
-				# print "multiplying", elem, ":", matrix[row][elem], "by", vector[elem]
+				print "multiplying", elem, ":", matrix[row][elem], "by", vector[elem]
 
 				mult = matrix[row][elem] * vector[elem]		# Multiply matrix row by vector column
 				curr_sum += mult 			# Sum terms successively
-			# print "curr_sum:", curr_sum
-		pr_vector[row] = curr_sum
-	# print "Matrix times vector:"
-	# pprint(pr_vector)
+			print "curr_sum:", curr_sum
+		
+		pr_vector[row] = curr_sum + null_sum
+	print "Multiplying/adding null terms:"
+
+	print "result of Matrix times vector:"
+	pprint(pr_vector)
 	return pr_vector
 def rotate(matrix):
 	'''
@@ -248,7 +258,7 @@ def test_onestep():
 	pprint(round2)
 	round3 = matrix_times_vector(rotated_weighted, round2)
 
-def one_iteration(damping, matrix, pr_vector):
+def one_iteration(damping, matrix, pr_vector, dangling_sites):
 	new_pr_vector = {}
 	inv_damping = 1 - damping
 	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
@@ -257,17 +267,17 @@ def one_iteration(damping, matrix, pr_vector):
 	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
 	print "Rotating weighted matrix..."
 	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
-	# print "rotated_weighted"
-	# pprint(rotated_weighted)
+	print "rotated_weighted"
+	pprint(rotated_weighted)
 	print "Applying damping to matrix..."
 	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
-	# print"rotated_weighted_damping"
-	# pprint(rotated_weighted_damping)
+	print"rotated_weighted_damping"
+	pprint(rotated_weighted_damping)
 	# sites_list = make_site_list(adj_list)				 # Each unique site has an integer ID
 	# pr_vec = make_init_pr_vec_weighted(sites_list)					 # Make initial PR vector, which is a vector with unique sites w/ score 1
 	# rw_v = matrix_times_vector(rotated_weighted, pr_vector)
 	print "Multiplying matrix with pr vector..."
-	term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
+	term1 = matrix_times_vector(damping, rotated_weighted_damping, pr_vector, dangling_sites)
 	print "Applying surfer model..."
 	term2 = surfer_times_pr(inv_damping,pr_vector)
 	print "Final addition..."
@@ -335,29 +345,41 @@ def delete_null_columns(adj_list, pr_vector):
 			if j not in pr_vector:
 				# print j, "is not in pr_vector"
 				del adj_list[i][j]
-
-damping = 0.85
-infile = open("out2", "r")
+def find_dangling(pr_vector, adj_list):
+	'''
+		Find dangling_sites. Useful for dealing with null columns later
+	'''
+	dangling_sites = []
+	for i in pr_vector:
+		print i
+		if i not in adj_list:
+			print "not"
+			dangling_sites.append(i)
+	pprint(dangling_sites)
+	return dangling_sites
+damping = 1
+infile = open("out-engr", "r")
 print "Loading pickle object..."
-adj_list = pickle.load(infile)
+# adj_list = pickle.load(infile)
 # adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 # adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
-# adj_list = {"A":{"B":0}}
+adj_list = {"A":{"B":0}}
 # adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"H":0},"RevB":{"H":0},"RevC":{"H":0},"RevD":{"H":0}}
-print "Making initial pr vector..."
-# pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
-pr_vector = make_init_pr_vec_weighted(make_site_list_no_null(adj_list))
-# pprint(pr_vector)
+# print "Making initial pr vector..."
+pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
+dangling_sites = find_dangling(pr_vector, adj_list)
+# pr_vector = make_init_pr_vec_weighted(make_site_list_no_null(adj_list))
+pprint(pr_vector)
 # print "Filling null columns..."
 # adj_list = fill_null_columns(adj_list, pr_vector)
-print "Deleting null columns..."
-delete_null_columns(adj_list, pr_vector)
-# pprint(adj_list)
+# print "Deleting null columns..."
+# delete_null_columns(adj_list, pr_vector)
+pprint(adj_list)
 print "Iterating..."
-pr = one_iteration(damping, adj_list, pr_vector)
+pr = one_iteration(damping, adj_list, pr_vector, dangling_sites)
 # print "\norig pr:"
-limit = 50
+limit = 1
 iterations = 0
 while(iterations < limit):
 	# print "\n-------------"
@@ -365,7 +387,7 @@ while(iterations < limit):
 	# print "Pr before:"
 	# pprint(pr)
 	print "# ", iterations
-	pr = one_iteration(damping, adj_list, pr)
+	pr = one_iteration(damping, adj_list, pr, dangling_sites)
 	# print "Pr after:"
 	# pprint(pr)
 	# print "\nsummed:", sum_vector(pr)
@@ -376,7 +398,7 @@ print "iterations:", iterations
 sorted_pr = sorted(pr.items(), key=operator.itemgetter(1))
 # pprint(sorted_pr)
 
-pprint(sorted_pr[-10:-1])
+pprint(sorted_pr[-10:])
 print "sum:", sum_vector(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
