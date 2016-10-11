@@ -59,6 +59,22 @@ def make_site_list(adj_list):
 				pass
 	# pprint(site_list)
 	return site_list
+def make_site_list_no_null(adj_list):
+	'''
+	Return a collection of unique sites from an adj_list of the web without null columns
+	'''
+	# print "Making site_list"
+	site_list = {}
+	num_id = 1				# Numerical id for each unique site
+	# pprint(adj_list)
+	for i in adj_list:
+		# print "inserting i:",i
+		if i not in site_list:
+			# print "i not in site_list"
+			site_list[i] = num_id
+			num_id += 1
+	# pprint(site_list)
+	return site_list
 def make_init_pr_vec_weighted(site_list):
 	i = 1.0/len(site_list)
 	pr_vec = {}
@@ -235,7 +251,7 @@ def one_iteration(damping, matrix, pr_vector):
 	new_pr_vector = {}
 	inv_damping = 1 - damping
 	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
+	# unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
 	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
 	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
 	# print "rotated_weighted"
@@ -302,29 +318,46 @@ def fill_null_columns(adj_list, pr_vector):
 	# pprint(adj_list)
 	# print "End finding null column"
 	return adj_list
+def delete_null_columns(adj_list, pr_vector):
+	'''
+		Delete outlinks to not include dangling links
+	'''
+	new_list = {}
+	for i in adj_list:
+		for j in adj_list[i].keys():
+			if j not in pr_vector:
+				# print j, "is not in pr_vector"
+				del adj_list[i][j]
+
 damping = 0.85
-# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
 infile = open("out", "r")
-adj_list = pickle.load(infile)
-# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+print "Loading pickle object..."
+# adj_list = pickle.load(infile)
+adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
 # adj_list = {"A":{"B":0}}
 # adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"H":0},"RevB":{"H":0},"RevC":{"H":0},"RevD":{"H":0}}
-print "Initializing matrices..."
-pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
-adj_list = fill_null_columns(adj_list, pr_vector)
+print "Making initial pr vector..."
+# pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
+pr_vector = make_init_pr_vec_weighted(make_site_list_no_null(adj_list))
+# pprint(pr_vector)
+# print "Filling null columns..."
+# adj_list = fill_null_columns(adj_list, pr_vector)
+print "Deleting null columns..."
+delete_null_columns(adj_list, pr_vector)
+# pprint(adj_list)
+print "Iterating..."
 pr = one_iteration(damping, adj_list, pr_vector)
 # print "\norig pr:"
-# pprint(pr)
-limit = 50
+limit = 25
 iterations = 0
-print "Iterating..."
 while(iterations < limit):
 	# print "\n-------------"
 	# print "\nRun iteration ", iterations
 	# print "Pr before:"
 	# pprint(pr)
-	print "# ", iterations
+	# print "# ", iterations
 	pr = one_iteration(damping, adj_list, pr)
 	# print "Pr after:"
 	# pprint(pr)
@@ -341,4 +374,5 @@ print "sum:", sum_vector(pr)
 # pprint(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
+infile.close()
 print "Done"
