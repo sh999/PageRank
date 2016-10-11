@@ -2,8 +2,10 @@
 small.py
 Do pagerank on small networks
 '''
+import operator
 from pprint import pprint
 import copy
+import pickle
 def calc_unweighted(adj_list):
 	'''
 		Return adj list based on link presence; if link to a site, element is 1
@@ -36,28 +38,26 @@ def make_site_list(adj_list):
 	'''
 	Return a collection of unique sites from an adj_list of the web
 	'''
-	print "Making site_list"
+	# print "Making site_list"
 	site_list = {}
 	num_id = 1				# Numerical id for each unique site
-
-	pprint(adj_list)
+	# pprint(adj_list)
 	for i in adj_list:
-		print "inserting i:",i
+		# print "inserting i:",i
 		if i not in site_list:
-			print "i not in site_list"
+			# print "i not in site_list"
 			site_list[i] = num_id
 			num_id += 1
 		for j in adj_list[i]:
-			print "inserting j:",j
+			# print "inserting j:",j
 			if j not in site_list:
-				print "j not in site_list"
+				# print "j not in site_list"
 				site_list[j] = num_id
 				num_id += 1
 			else:
-				print "j in site_list"
+				# print "j in site_list"
 				pass
-	print "SITE LIST:"
-	pprint(site_list)
+	# pprint(site_list)
 	return site_list
 def make_init_pr_vec_weighted(site_list):
 	i = 1.0/len(site_list)
@@ -66,8 +66,8 @@ def make_init_pr_vec_weighted(site_list):
 		pr_vec[pg] = i 
 		# i += 1
 	# pr_vec = [1,2,3,4]
-	print "pr_vec:"
-	pprint(pr_vec)
+	# print "pr_vec:"
+	# pprint(pr_vec)
 	return pr_vec
 def matrix_times_vector(matrix, vector):
 	'''
@@ -127,7 +127,7 @@ def scalar_times_matrix(scalar, matrix):
 	# print scalar
 	# pprint(matrix)
 	result = {}
-	pprint(matrix)
+	# pprint(matrix)
 	for k, v in matrix.iteritems(): 	# Loop through matrix row elements
 		# print "k:", k
 		to_insert = {} 					# Temporary row element to insert
@@ -238,33 +238,30 @@ def one_iteration(damping, matrix, pr_vector):
 	unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
 	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
 	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
-	print "rotated_weighted"
-	pprint(rotated_weighted)
+	# print "rotated_weighted"
+	# pprint(rotated_weighted)
 	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
-	print"rotated_weighted_damping"
-	pprint(rotated_weighted_damping)
+	# print"rotated_weighted_damping"
+	# pprint(rotated_weighted_damping)
 	# sites_list = make_site_list(adj_list)				 # Each unique site has an integer ID
 	# pr_vec = make_init_pr_vec_weighted(sites_list)					 # Make initial PR vector, which is a vector with unique sites w/ score 1
 	# rw_v = matrix_times_vector(rotated_weighted, pr_vector)
 	term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
-
 	term2 = surfer_times_pr(inv_damping,pr_vector)
 	added = add_vectors(term1,term2)
-
-	print"\nterm1:"
-	print "\tmatrix:"
-	pprint(rotated_weighted_damping)
-	print "\ttimes vec:"
-	pprint(pr_vector)
-	print "equales term1..."
-	pprint(term1)
-	print "\nterm2:"
-	pprint(term2)
-	print "\nadded:"
-	pprint(added)
-	print "\nsum of elements:"
-	pprint(sum_vector(added))
-	print ""
+	# print"\nterm1:"
+	# print "\tmatrix:"
+	# pprint(rotated_weighted_damping)
+	# print "\ttimes vec:"
+	# pprint(pr_vector)
+	# print "equales term1..."
+	# pprint(term1)
+	# print "\nterm2:"
+	# pprint(term2)
+	# print "\nadded:"
+	# pprint(added)
+	# print "\nsum of elements:"
+	# pprint(sum_vector(added))
 	return added
 
 def sum_vector(vector):
@@ -289,57 +286,59 @@ def fill_null_columns(adj_list, pr_vector):
 	'''
 		Return names of null clolumns
 	'''
-	print "Finding null column:"
-	print "adj list:"
-	pprint(adj_list)
-	print "pr_vector:"
-	pprint(pr_vector)
-	print "keys in adj_list:"
+	# print "Finding null column:"
+	# print "adj list:"
+	# pprint(adj_list)
+	# print "pr_vector:"
+	# pprint(pr_vector)
+	# print "keys in adj_list:"
 	to_insert = {}
 	for key in pr_vector:
 		to_insert[key] = 0
 	for key in pr_vector:
 		if key not in adj_list:
 			adj_list[key] = to_insert
-	# for key in pr_vector:
-	# 	if key not in adj_list:
-	# 		print "Key",key," not found in adj_list"
-	# 		for a, b in adj_list.iteritems():
-	# 			to_insert = {}
-	# 			to_insert[key] = 0
-	# 			adj_list[a].update(to_insert)
-	print "new adj_list"
-	pprint(adj_list)
-	print "End finding null column"
+	# print "new adj_list"
+	# pprint(adj_list)
+	# print "End finding null column"
 	return adj_list
 damping = 0.85
 # adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
-adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+infile = open("out", "r")
+adj_list = pickle.load(infile)
+# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
 # adj_list = {"A":{"B":0}}
-adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"H":0},"RevB":{"H":0},"RevC":{"H":0},"RevD":{"H":0}}
-
+# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"H":0},"RevB":{"H":0},"RevC":{"H":0},"RevD":{"H":0}}
+print "Initializing matrices..."
 pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
 adj_list = fill_null_columns(adj_list, pr_vector)
 pr = one_iteration(damping, adj_list, pr_vector)
-print "\norig pr:"
-pprint(pr)
-limit = 2
+# print "\norig pr:"
+# pprint(pr)
+limit = 50
 iterations = 0
+print "Iterating..."
 while(iterations < limit):
-	print "\n-------------"
-	print "\nRun iteration ", iterations
-	print "Pr before:"
-	pprint(pr)
+	# print "\n-------------"
+	# print "\nRun iteration ", iterations
+	# print "Pr before:"
+	# pprint(pr)
+	print "# ", iterations
 	pr = one_iteration(damping, adj_list, pr)
-	print "Pr after:"
-	pprint(pr)
-	print "\nsummed:", sum_vector(pr)
+	# print "Pr after:"
+	# pprint(pr)
+	# print "\nsummed:", sum_vector(pr)
 	# print "\nnormalized:"
 	# pprint(normalize(pr))
 	iterations += 1
+print "iterations:", iterations
+sorted_pr = sorted(pr.items(), key=operator.itemgetter(1))
+pprint(sorted_pr)
 
+print "sum:", sum_vector(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
+print "Done"
