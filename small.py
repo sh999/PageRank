@@ -24,8 +24,8 @@ def calc_weighted(adj_list):
 	'''
 		Return adj list based on # of sites (vote dilution); if link to 3 sites, each element is 1/3
 	'''
-	weighted = copy.deepcopy(adj_list)
-	for k, v in weighted.iteritems():
+	# weighted = copy.deepcopy(adj_list)
+	for k, v in adj_list.iteritems():
 		# print "site:", k
 		# print "# links:", len(v)
 		# print "links:", v
@@ -33,7 +33,8 @@ def calc_weighted(adj_list):
 			v[name] = 1.0/len(v)
 		# print ""
 	# pprint(weighted)
-	return weighted
+	# return weighted
+	return adj_list
 def make_site_list(adj_list):
 	'''
 	Return a collection of unique sites from an adj_list of the web
@@ -252,18 +253,24 @@ def one_iteration(damping, matrix, pr_vector):
 	inv_damping = 1 - damping
 	# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 	# unweighted = calc_unweighted(adj_list)	 # Adj list where 1 = link present
+	print "Calculating weighted matrix..."
 	weighted = calc_weighted(adj_list)  	 # Get adj list of raw numbers (1 = outlinks to)
+	print "Rotating weighted matrix..."
 	rotated_weighted = rotate(weighted)		 # Rotate weighted adj list to proper form
 	# print "rotated_weighted"
 	# pprint(rotated_weighted)
+	print "Applying damping to matrix..."
 	rotated_weighted_damping = scalar_times_matrix(damping,rotated_weighted)		 # Multiply weighted matrix by damping factor (alpha * S)
 	# print"rotated_weighted_damping"
 	# pprint(rotated_weighted_damping)
 	# sites_list = make_site_list(adj_list)				 # Each unique site has an integer ID
 	# pr_vec = make_init_pr_vec_weighted(sites_list)					 # Make initial PR vector, which is a vector with unique sites w/ score 1
 	# rw_v = matrix_times_vector(rotated_weighted, pr_vector)
+	print "Multiplying matrix with pr vector..."
 	term1 = matrix_times_vector(rotated_weighted_damping, pr_vector)
+	print "Applying surfer model..."
 	term2 = surfer_times_pr(inv_damping,pr_vector)
+	print "Final addition..."
 	added = add_vectors(term1,term2)
 	# print"\nterm1:"
 	# print "\tmatrix:"
@@ -332,8 +339,8 @@ def delete_null_columns(adj_list, pr_vector):
 damping = 0.85
 infile = open("out", "r")
 print "Loading pickle object..."
-# adj_list = pickle.load(infile)
-adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
+adj_list = pickle.load(infile)
+# adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
 # adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
 # adj_list = {"A":{"B":0}}
@@ -350,14 +357,14 @@ delete_null_columns(adj_list, pr_vector)
 print "Iterating..."
 pr = one_iteration(damping, adj_list, pr_vector)
 # print "\norig pr:"
-limit = 25
+limit = 10
 iterations = 0
 while(iterations < limit):
 	# print "\n-------------"
 	# print "\nRun iteration ", iterations
 	# print "Pr before:"
 	# pprint(pr)
-	# print "# ", iterations
+	print "# ", iterations
 	pr = one_iteration(damping, adj_list, pr)
 	# print "Pr after:"
 	# pprint(pr)
@@ -367,8 +374,9 @@ while(iterations < limit):
 	iterations += 1
 print "iterations:", iterations
 sorted_pr = sorted(pr.items(), key=operator.itemgetter(1))
-pprint(sorted_pr)
+# pprint(sorted_pr)
 
+pprint(sorted_pr[-10:-1])
 print "sum:", sum_vector(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
