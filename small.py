@@ -337,7 +337,7 @@ def delete_null_columns(adj_list, pr_vector):
 				del adj_list[i][j]
 
 damping = 0.85
-infile = open("out", "r")
+infile = open("out2", "r")
 print "Loading pickle object..."
 adj_list = pickle.load(infile)
 # adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
@@ -357,7 +357,7 @@ delete_null_columns(adj_list, pr_vector)
 print "Iterating..."
 pr = one_iteration(damping, adj_list, pr_vector)
 # print "\norig pr:"
-limit = 10
+limit = 50
 iterations = 0
 while(iterations < limit):
 	# print "\n-------------"
