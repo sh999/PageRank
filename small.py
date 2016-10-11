@@ -316,7 +316,7 @@ adj_list = fill_null_columns(adj_list, pr_vector)
 pr = one_iteration(damping, adj_list, pr_vector)
 print "\norig pr:"
 pprint(pr)
-limit = 50
+limit = 2
 iterations = 0
 while(iterations < limit):
 	print "\n-------------"
