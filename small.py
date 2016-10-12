@@ -357,15 +357,23 @@ def find_dangling(pr_vector, adj_list):
 			dangling_sites.append(i)
 	# pprint(dangling_sites)
 	return dangling_sites
-damping = 1
+def calc_dist(vec1, vec2):
+	'''
+		Calculates distance between two vectors with same elements
+	'''
+	diff = 0
+	for i in vec1:
+		diff += abs(vec2[i] - vec1[i])
+	return diff
+damping = 0.95
 infile = open("out-engr", "r")
 print "Loading pickle object..."
 adj_list = pickle.load(infile)
 # adj_list = {"A":{"B":0,"C":0}, "B":{"C":0},"C":{"A":0},"D":{"C":0}}
-# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,}}
+# adj_list = {"Home":{"About":0,"Products":0,"Links":0}, "About":{"Home":0},"Products":{"Home":0},"Links":{"Home":0,"ExtA":0,"ExtB":0,"ExtC":0,"ExtD":0,}}
 # adj_list = {"1":{"2":0,"4":0},"2":{"3":0,"5":0},"3":{"4":0,"1":0},"4":{"5":0,"2":0},"5":{"1":0,"3":0}}
-# adj_list = {"A":{"B":0}}
-# adj_list = {"H":{"Ab":0,"P":0,"L":0}, "Ab":{"H":0},"P":{"H":0},"L":{"H":0,"A":0,"B":0,"C":0,"D":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"H":0},"RevB":{"H":0},"RevC":{"H":0},"RevD":{"H":0}}
+# adj_list = {"ExtA":{"ExtB":0}}
+# adj_list = {"Home":{"About":0,"Products":0,"Links":0}, "About":{"Home":0},"Products":{"Home":0},"Links":{"Home":0,"ExtA":0,"ExtB":0,"ExtC":0,"ExtD":0,"RevA":0,"RevB":0,"RevC":0,"RevD":0},"RevA":{"Home":0},"RevB":{"Home":0},"RevC":{"Home":0},"RevD":{"Home":0}}
 # print "Making initial pr vector..."
 pr_vector = make_init_pr_vec_weighted(make_site_list(adj_list))
 dangling_sites = find_dangling(pr_vector, adj_list)
@@ -379,9 +387,10 @@ dangling_sites = find_dangling(pr_vector, adj_list)
 print "Iterating..."
 pr = one_iteration(damping, adj_list, pr_vector, dangling_sites)
 # print "\norig pr:"
-limit = 50
+limit = 200
 iterations = 0
 prev_pr = pr
+convergence = 0.000001
 while(iterations < limit):
 	# print "\n-------------"
 	# print "\nRun iteration ", iterations
@@ -390,6 +399,9 @@ while(iterations < limit):
 	print "# ", iterations
 	pr = one_iteration(damping, adj_list, pr, dangling_sites)
 	dist = calc_dist(pr, prev_pr)
+	print "dist to prev vec:", dist
+	if dist < convergence:
+		break
 	# print "Pr after:"
 	# pprint(pr)
 	# print "\nsummed:", sum_vector(pr)
@@ -397,12 +409,14 @@ while(iterations < limit):
 	# pprint(normalize(pr))
 	prev_pr = pr
 	iterations += 1
-print "iterations:", iterations
+print "Damping:", damping
+print "Convergence limit:", convergence
+print "# Iterations:", iterations
 sorted_pr = sorted(pr.items(), key=operator.itemgetter(1))
 # pprint(sorted_pr)
 
 pprint(sorted_pr[-10:])
-print "sum:", sum_vector(pr)
+print "Sum:", sum_vector(pr)
 # pr = one_iteration(damping, adj_list, pr)
 # pprint(pr)
 # pr = one_iteration(damping, adj_list, pr)
