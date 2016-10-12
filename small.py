@@ -381,6 +381,7 @@ pr = one_iteration(damping, adj_list, pr_vector, dangling_sites)
 # print "\norig pr:"
 limit = 50
 iterations = 0
+prev_pr = pr
 while(iterations < limit):
 	# print "\n-------------"
 	# print "\nRun iteration ", iterations
@@ -388,11 +389,13 @@ while(iterations < limit):
 	# pprint(pr)
 	print "# ", iterations
 	pr = one_iteration(damping, adj_list, pr, dangling_sites)
+	dist = calc_dist(pr, prev_pr)
 	# print "Pr after:"
 	# pprint(pr)
 	# print "\nsummed:", sum_vector(pr)
 	# print "\nnormalized:"
 	# pprint(normalize(pr))
+	prev_pr = pr
 	iterations += 1
 print "iterations:", iterations
 sorted_pr = sorted(pr.items(), key=operator.itemgetter(1))
